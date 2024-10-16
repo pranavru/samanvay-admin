@@ -41,9 +41,11 @@ public class MandalController {
   @PostMapping("/api/mandals")
   public Message createMandal(@RequestBody Iterable<Mandal> mandals) {
     for (Mandal m : mandals) {
+      
       Mandal newMandal = Mandal.builder()
         .name(m.getName())
         .location(m.getLocation())
+        .zone(m.getZone())
         .build();
 
       this.mandalRepository.save(newMandal);
@@ -69,6 +71,7 @@ public class MandalController {
 
         updatedMandal.setName(m.getName());
         updatedMandal.setLocation(m.getLocation());
+        updatedMandal.setZone(m.getZone());
 
         this.mandalRepository.save(updatedMandal);
       }

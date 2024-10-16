@@ -17,4 +17,8 @@ public class Mandal {
 
     private String name;
     private String location;
+
+    @ManyToOne
+    @JoinColumn(name = "zone_id", nullable = true)
+    private Zone zone;
 }
