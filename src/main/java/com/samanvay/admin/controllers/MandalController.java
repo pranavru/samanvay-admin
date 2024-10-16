@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import com.samanvay.admin.repository.MandalRepository;
 
 import com.samanvay.admin.entity.Mandal;
+import com.samanvay.admin.entity.Message;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -37,13 +39,41 @@ public class MandalController {
 
   @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/mandals")
-  public Mandal createMandal(@RequestBody Mandal Mandal) {
-    return this.mandalRepository.save(Mandal);
+  public Message createMandal(@RequestBody Iterable<Mandal> mandals) {
+    for (Mandal m : mandals) {
+      Mandal newMandal = Mandal.builder()
+        .name(m.getName())
+        .location(m.getLocation())
+        .build();
+
+      this.mandalRepository.save(newMandal);
+    }
+
+    return new Message("Mandals created successfully", "success");
   }
 
   @CrossOrigin(origins = "http://localhost:5173")
   @DeleteMapping("/api/mandals/{id}")
-  public void deleteMandal(@PathVariable Long id) {
+  public Message deleteMandal(@PathVariable Long id) {
     this.mandalRepository.deleteById(id);
+
+    return new Message("Mandal deleted successfully", "success");
+  }
+
+  @CrossOrigin(origins = "http://localhost:5173")
+  @PutMapping("/api/mandals")
+  public Message updateMandal(@RequestBody Iterable<Mandal> mandals) {
+    for (Mandal m : mandals) {
+      if(this.mandalRepository.existsById(m.getId())) {
+        Mandal updatedMandal = this.mandalRepository.findById(m.getId()).get();
+
+        updatedMandal.setName(m.getName());
+        updatedMandal.setLocation(m.getLocation());
+
+        this.mandalRepository.save(updatedMandal);
+      }
+    }
+    
+    return new Message("Mandal updated successfully", "success");
   }
 }
