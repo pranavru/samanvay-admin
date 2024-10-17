@@ -20,6 +20,9 @@ public class User {
     @Column(name = "email", nullable = false, unique = true) 
     private String email;
 
+    @Column(name = "phone_number", nullable = false, unique = true)
+    private String phoneNumber;
+
     @Column(name = "date_of_birth")
     private String dateOfBirth;
 
@@ -31,9 +34,14 @@ public class User {
     private Address address;
 
     @ManyToOne
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id", nullable = true)
     private Role role;
-    
 
+    @ManyToOne
+    @JoinColumn(name = "mandal_id", nullable = true)
+    private Mandal mandal;
     
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "reference_contact_id", referencedColumnName = "id", nullable = true)
+    private ReferenceContact referenceContact;
 }

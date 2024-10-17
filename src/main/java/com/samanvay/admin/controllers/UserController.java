@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.samanvay.admin.entity.Address;
+// import com.samanvay.admin.entity.ReferenceContact;
 import com.samanvay.admin.entity.User;
 
 import com.samanvay.admin.repository.AddressRepository;
+// import com.samanvay.admin.repository.ReferenceContactRepository;
 import com.samanvay.admin.repository.UserRepository;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,6 +27,9 @@ public class UserController {
 
   @Autowired
   private AddressRepository addressRepository;
+
+  // @Autowired
+  // private ReferenceContactRepository referenceContactRepository;
 
   public UserController(UserRepository userRepository) {
     this.userRepository = userRepository;
@@ -51,6 +56,10 @@ public class UserController {
       Address savedAddress = addressRepository.save(userToSave.getAddress());
 
       userToSave.setAddress(savedAddress);
+      userToSave.setMandal(null);
+      userToSave.setIsActive(false);
+      userToSave.setRole(null);
+      // userToSave.setReferenceContact(null);
       
       User entity = this.userRepository.save(userToSave);
 
@@ -72,10 +81,39 @@ public class UserController {
       .findById(id)
       .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
-    existingUser.setName(updatedUser.getName());
-    existingUser.setRole(updatedUser.getRole());
-    existingUser.setDateOfBirth(updatedUser.getDateOfBirth());
-    existingUser.setIsActive(updatedUser.getIsActive());
+    if(!existingUser.getIsActive() && updatedUser.getIsActive()) {
+      if(updatedUser.getRole() == null) {
+        throw new RuntimeException("Role is required for active users");
+      } else if(updatedUser.getMandal() == null) {
+        throw new RuntimeException("Mandal is required for active users");
+      // } else if(updatedUser.getReferenceContact() == null) {
+      //   throw new RuntimeException("Reference Contact is required for active users");
+      }
+    }
+
+    if(existingUser.getIsActive()) {
+      existingUser.setAddress(updatedUser.getAddress());
+      existingUser.setDateOfBirth(updatedUser.getDateOfBirth());
+
+      // ReferenceContact savedReferenceContact = referenceContactRepository.save(updatedUser.getReferenceContact());  
+      // existingUser.setReferenceContact(savedReferenceContact);
+
+      // Roles can be updated by Super Admin only
+      // Will be added later
+
+    } else {
+      existingUser.setName(updatedUser.getName());
+      existingUser.setRole(updatedUser.getRole());
+      existingUser.setDateOfBirth(updatedUser.getDateOfBirth());
+      existingUser.setIsActive(updatedUser.getIsActive());
+      existingUser.setAddress(updatedUser.getAddress());
+      existingUser.setMandal(updatedUser.getMandal());
+      existingUser.setEmail(updatedUser.getEmail());
+      existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
+
+      // ReferenceContact savedReferenceContact = referenceContactRepository.save(updatedUser.getReferenceContact());  
+      // existingUser.setReferenceContact(savedReferenceContact);
+    }
 
     Address savedAddress = addressRepository.save(updatedUser.getAddress());
     existingUser.setAddress(savedAddress);
