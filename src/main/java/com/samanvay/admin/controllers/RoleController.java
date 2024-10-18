@@ -23,19 +23,19 @@ public class RoleController {
     this.roleRepository = roleRepository;
   }
 
-  @GetMapping("/roles")
+  @GetMapping("/api/roles")
   public Iterable<Role> getRoles() {
     return this.roleRepository.findAll();
   }
 
-  @PostMapping("/roles")
+  @PostMapping("/api/roles")
   public Role saveRole(@RequestBody Role role) {
     Role entity = this.roleRepository.save(role);
 
     return entity;
   }
 
-  @DeleteMapping("/roles/{id}")
+  @DeleteMapping("/api/roles/{id}")
   public String deleteRole(@PathVariable Long id) {
     this.roleRepository.deleteById(id);
 

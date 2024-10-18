@@ -29,7 +29,7 @@ public class User {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
@@ -40,8 +40,8 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "mandal_id", nullable = true)
     private Mandal mandal;
-    
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "reference_contact_id", referencedColumnName = "id", nullable = true)
-    private ReferenceContact referenceContact;
+
+    @ManyToOne
+    @JoinColumn(name = "user_references_id", referencedColumnName = "id")
+    private UserReference referenceContacts;
 }

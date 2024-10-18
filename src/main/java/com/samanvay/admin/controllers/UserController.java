@@ -5,11 +5,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.samanvay.admin.entity.Address;
-// import com.samanvay.admin.entity.ReferenceContact;
+import com.samanvay.admin.entity.UserReference;
 import com.samanvay.admin.entity.User;
-
+import com.samanvay.admin.entity.DTO.UserDTO;
 import com.samanvay.admin.repository.AddressRepository;
-// import com.samanvay.admin.repository.ReferenceContactRepository;
+import com.samanvay.admin.repository.MandalRepository;
+import com.samanvay.admin.repository.UserReferenceRepository;
+import com.samanvay.admin.repository.RoleRepository;
 import com.samanvay.admin.repository.UserRepository;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,8 +30,14 @@ public class UserController {
   @Autowired
   private AddressRepository addressRepository;
 
-  // @Autowired
-  // private ReferenceContactRepository referenceContactRepository;
+  @Autowired
+  private RoleRepository roleRepository;
+
+  @Autowired
+  private MandalRepository mandalRepository;
+
+  @Autowired
+  private UserReferenceRepository userReferenceRepository;
 
   public UserController(UserRepository userRepository) {
     this.userRepository = userRepository;
@@ -51,19 +59,27 @@ public class UserController {
 
   @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/users")
-  public User saveUser(@RequestBody User userToSave) {
+  public User saveUser(@RequestBody UserDTO userToSave) {
 
       Address savedAddress = addressRepository.save(userToSave.getAddress());
-
-      userToSave.setAddress(savedAddress);
-      userToSave.setMandal(null);
-      userToSave.setIsActive(false);
-      userToSave.setRole(null);
-      // userToSave.setReferenceContact(null);
       
-      User entity = this.userRepository.save(userToSave);
-
-      return entity;
+      User updatedUser = User.builder()
+        .name(userToSave.getName())
+        .email(userToSave.getEmail())
+        .phoneNumber(userToSave.getPhoneNumber())
+        .dateOfBirth(userToSave.getDateOfBirth())
+        
+        // Updated Address
+        .address(savedAddress)
+        
+        // Default values set for new user
+        .isActive(false)
+        .mandal(null)
+        .referenceContacts(null)
+        .role(null)
+        .build();
+      
+      return this.userRepository.save(updatedUser);
   }
 
   @CrossOrigin(origins = "http://localhost:5173")
@@ -73,50 +89,70 @@ public class UserController {
 
     return "User with user ID: " + id + " deleted successfully";
   }
-
+  
   @CrossOrigin(origins = "http://localhost:5173")
   @PutMapping("/api/users/{id}")
-  public User updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-    User existingUser = userRepository
-      .findById(id)
-      .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+  public User updateUser(@PathVariable Long id, @RequestBody UserDTO userToSave) {    
+    String UserNotFoundMessage = "User not found with id: " + id;
+    User existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException(UserNotFoundMessage));
 
-    if(!existingUser.getIsActive() && updatedUser.getIsActive()) {
-      if(updatedUser.getRole() == null) {
+    if(!existingUser.getIsActive() && userToSave.getIsActive()) {
+      if(userToSave.getRoleId() == null) {
         throw new RuntimeException("Role is required for active users");
-      } else if(updatedUser.getMandal() == null) {
+      } 
+      if(userToSave.getMandalId() == null) {
         throw new RuntimeException("Mandal is required for active users");
-      // } else if(updatedUser.getReferenceContact() == null) {
-      //   throw new RuntimeException("Reference Contact is required for active users");
+      }
+      if(userToSave.getReferenceContacts() == null) {
+        throw new RuntimeException("Reference Contacts are required for active users");
       }
     }
 
     if(existingUser.getIsActive()) {
-      existingUser.setAddress(updatedUser.getAddress());
-      existingUser.setDateOfBirth(updatedUser.getDateOfBirth());
-
-      // ReferenceContact savedReferenceContact = referenceContactRepository.save(updatedUser.getReferenceContact());  
-      // existingUser.setReferenceContact(savedReferenceContact);
+      existingUser.setAddress(userToSave.getAddress());
+      existingUser.setDateOfBirth(userToSave.getDateOfBirth());
 
       // Roles can be updated by Super Admin only
       // Will be added later
 
     } else {
-      existingUser.setName(updatedUser.getName());
-      existingUser.setRole(updatedUser.getRole());
-      existingUser.setDateOfBirth(updatedUser.getDateOfBirth());
-      existingUser.setIsActive(updatedUser.getIsActive());
-      existingUser.setAddress(updatedUser.getAddress());
-      existingUser.setMandal(updatedUser.getMandal());
-      existingUser.setEmail(updatedUser.getEmail());
-      existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
+      existingUser.setName(userToSave.getName());
+      existingUser.setDateOfBirth(userToSave.getDateOfBirth());
+      existingUser.setAddress(userToSave.getAddress());
+      existingUser.setEmail(userToSave.getEmail());
+      existingUser.setPhoneNumber(userToSave.getPhoneNumber());
+      
+      if(userToSave.getRoleId() != null) {
+        roleRepository.findById(userToSave.getRoleId()).orElseThrow(() -> new RuntimeException("Role not found with id: " + userToSave.getRoleId()));
+        
+        existingUser.setRole(roleRepository.findById(userToSave.getRoleId()).get());
+      } 
+      if(userToSave.getMandalId() != null) {
+        mandalRepository.findById(userToSave.getMandalId()).orElseThrow(() -> new RuntimeException("Mandal not found with id: " + userToSave.getMandalId()));
+        
+        existingUser.setMandal(mandalRepository.findById(userToSave.getMandalId()).get());
+      } 
+      if(userToSave.getReferenceContacts() != null) {
+        userRepository.findById(userToSave.getReferenceContacts().getPrimaryContactId()).orElseThrow(() -> new RuntimeException("Primary Contact not found with id: " + userToSave.getReferenceContacts().getPrimaryContactId()));
+        userRepository.findById(userToSave.getReferenceContacts().getSecondaryContactId()).orElseThrow(() -> new RuntimeException("Secondary Contact not found with id: " + userToSave.getReferenceContacts().getSecondaryContactId()));
 
-      // ReferenceContact savedReferenceContact = referenceContactRepository.save(updatedUser.getReferenceContact());  
-      // existingUser.setReferenceContact(savedReferenceContact);
+        User newUserPrimaryContact = userRepository.findById(userToSave.getReferenceContacts().getPrimaryContactId()).get();
+        User newUserSecondaryContact = userRepository.findById(userToSave.getReferenceContacts().getSecondaryContactId()).get();
+
+        UserReference newUserReference = UserReference
+          .builder()
+          .contactDescription(userToSave.getReferenceContacts().getContactDescription())
+          .primaryContact(newUserPrimaryContact)
+          .secondaryContact(newUserSecondaryContact)
+          .build();
+
+        UserReference referencesPairToSave = userReferenceRepository.save(newUserReference);
+        
+        existingUser.setReferenceContacts(referencesPairToSave); 
+      }
+
+      existingUser.setIsActive(userToSave.getIsActive());
     }
-
-    Address savedAddress = addressRepository.save(updatedUser.getAddress());
-    existingUser.setAddress(savedAddress);
 
     User updatedEntity = userRepository.save(existingUser);
 

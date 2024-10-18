@@ -17,8 +17,4 @@ public class Zone {
 
     private String name;
     private String location;
-
-    // @ManyToOne(cascade = CascadeType.ALL)
-    // @JoinColumn(name = "created_by")
-    // private User createdBy;
 }
