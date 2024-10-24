@@ -1,5 +1,7 @@
 package com.samanvay.admin.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,4 +46,18 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "user_references_id", referencedColumnName = "id")
     private UserReference referenceContacts;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+    @Column(name = "updated_at", nullable = true)
+    private LocalDateTime updatedAt;
 }
