@@ -5,7 +5,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.samanvay.admin.entity.Address;
+import com.samanvay.admin.entity.Message;
 import com.samanvay.admin.entity.UserReference;
+import com.samanvay.admin.entity.UserReference.UserReferenceBuilder;
 import com.samanvay.admin.entity.User;
 import com.samanvay.admin.entity.DTO.UserDTO;
 import com.samanvay.admin.repository.AddressRepository;
@@ -83,11 +85,44 @@ public class UserController {
   }
 
   @CrossOrigin(origins = "http://localhost:5173")
+  @PostMapping("/api/bulk/users")
+  public Long[] saveUsers(@RequestBody UserDTO[] usersToSave) {
+    Long[] savedUserIds = new Long[usersToSave.length];
+    
+    for(int i = 0; i < usersToSave.length; i++) {
+      UserDTO u = usersToSave[i];
+      Address savedAddress = addressRepository.save(u.getAddress());
+      
+      User updatedUser = User.builder()
+        .name(u.getName())
+        .email(u.getEmail())
+        .phoneNumber(u.getPhoneNumber())
+        .dateOfBirth(u.getDateOfBirth())
+        
+        // Updated Address
+        .address(savedAddress)
+        
+        // Default values set for new user
+        .isActive(false)
+        .mandal(null)
+        .referenceContacts(null)
+        .role(null)
+        .build();
+      
+      User savedUser = this.userRepository.save(updatedUser);
+
+      savedUserIds[i] = savedUser.getId();
+    }
+      
+    return savedUserIds;
+  }
+
+  @CrossOrigin(origins = "http://localhost:5173")
   @DeleteMapping("/api/users/{id}")
-  public String deleteUser(@PathVariable Long id) {
+  public Message deleteUser(@PathVariable Long id) {
     this.userRepository.deleteById(id);
 
-    return "User with user ID: " + id + " deleted successfully";
+    return new Message("User with user ID: " + id + " deleted successfully", "success");
   }
   
   @CrossOrigin(origins = "http://localhost:5173")
@@ -109,50 +144,58 @@ public class UserController {
     }
 
     if(existingUser.getIsActive()) {
-      existingUser.setAddress(userToSave.getAddress());
-      existingUser.setDateOfBirth(userToSave.getDateOfBirth());
-
       // Roles can be updated by Super Admin only
       // Will be added later
 
     } else {
+      System.out.println("\n" + "User is not active" + "\n");
+
       existingUser.setName(userToSave.getName());
-      existingUser.setDateOfBirth(userToSave.getDateOfBirth());
-      existingUser.setAddress(userToSave.getAddress());
       existingUser.setEmail(userToSave.getEmail());
       existingUser.setPhoneNumber(userToSave.getPhoneNumber());
+      existingUser.setIsActive(userToSave.getIsActive());
       
       if(userToSave.getRoleId() != null) {
         roleRepository.findById(userToSave.getRoleId()).orElseThrow(() -> new RuntimeException("Role not found with id: " + userToSave.getRoleId()));
         
         existingUser.setRole(roleRepository.findById(userToSave.getRoleId()).get());
       } 
+
       if(userToSave.getMandalId() != null) {
         mandalRepository.findById(userToSave.getMandalId()).orElseThrow(() -> new RuntimeException("Mandal not found with id: " + userToSave.getMandalId()));
         
         existingUser.setMandal(mandalRepository.findById(userToSave.getMandalId()).get());
-      } 
+      }
+
       if(userToSave.getReferenceContacts() != null) {
-        userRepository.findById(userToSave.getReferenceContacts().getPrimaryContactId()).orElseThrow(() -> new RuntimeException("Primary Contact not found with id: " + userToSave.getReferenceContacts().getPrimaryContactId()));
-        userRepository.findById(userToSave.getReferenceContacts().getSecondaryContactId()).orElseThrow(() -> new RuntimeException("Secondary Contact not found with id: " + userToSave.getReferenceContacts().getSecondaryContactId()));
-
-        User newUserPrimaryContact = userRepository.findById(userToSave.getReferenceContacts().getPrimaryContactId()).get();
-        User newUserSecondaryContact = userRepository.findById(userToSave.getReferenceContacts().getSecondaryContactId()).get();
-
-        UserReference newUserReference = UserReference
+        UserReferenceBuilder newUserReference = UserReference
           .builder()
-          .contactDescription(userToSave.getReferenceContacts().getContactDescription())
-          .primaryContact(newUserPrimaryContact)
-          .secondaryContact(newUserSecondaryContact)
-          .build();
+          .contactDescription(userToSave.getReferenceContacts().getContactDescription());
 
-        UserReference referencesPairToSave = userReferenceRepository.save(newUserReference);
+        if(userToSave.getReferenceContacts().getPrimaryContactId() != null) {
+          userRepository.findById(userToSave.getReferenceContacts().getPrimaryContactId()).orElseThrow(() -> new RuntimeException("Primary Contact not found with id: " + userToSave.getReferenceContacts().getPrimaryContactId()));
+
+          User newUserPrimaryContact = userRepository.findById(userToSave.getReferenceContacts().getPrimaryContactId()).get();
+
+          newUserReference.primaryContact(newUserPrimaryContact);
+        }
+
+        if(userToSave.getReferenceContacts().getSecondaryContactId() != null) {
+          userRepository.findById(userToSave.getReferenceContacts().getSecondaryContactId()).orElseThrow(() -> new RuntimeException("Secondary Contact not found with id: " + userToSave.getReferenceContacts().getSecondaryContactId()));
+
+          User newUserSecondaryContact = userRepository.findById(userToSave.getReferenceContacts().getSecondaryContactId()).get();
+
+          newUserReference.secondaryContact(newUserSecondaryContact);
+        }
+
+        UserReference referencesPairToSave = userReferenceRepository.save(newUserReference.build());
         
         existingUser.setReferenceContacts(referencesPairToSave); 
       }
-
-      existingUser.setIsActive(userToSave.getIsActive());
     }
+
+    existingUser.setAddress(addressRepository.save(userToSave.getAddress()));
+    existingUser.setDateOfBirth(userToSave.getDateOfBirth());
 
     User updatedEntity = userRepository.save(existingUser);
 

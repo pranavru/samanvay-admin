@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.samanvay.admin.repository.MandalRepository;
-
+import com.samanvay.admin.repository.ZoneRepository;
 import com.samanvay.admin.entity.Mandal;
 import com.samanvay.admin.entity.Message;
+import com.samanvay.admin.entity.Zone;
+import com.samanvay.admin.entity.DTO.MandalDTO;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class MandalController {
   @Autowired
   private final MandalRepository mandalRepository;
+
+  @Autowired
+  private ZoneRepository zoneRepository;
 
   public MandalController(MandalRepository MandalRepository) {
     this.mandalRepository = MandalRepository;
@@ -39,13 +44,13 @@ public class MandalController {
 
   @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/mandals")
-  public Message createMandal(@RequestBody Iterable<Mandal> mandals) {
-    for (Mandal m : mandals) {
+  public Message createMandal(@RequestBody Iterable<MandalDTO> mandals) {
+    for (MandalDTO m : mandals) {
       
       Mandal newMandal = Mandal.builder()
         .name(m.getName())
         .location(m.getLocation())
-        .zone(m.getZone())
+        .zone(zoneRepository.findById(m.getZoneId()).get())
         .build();
 
       this.mandalRepository.save(newMandal);
@@ -64,14 +69,17 @@ public class MandalController {
 
   @CrossOrigin(origins = "http://localhost:5173")
   @PutMapping("/api/mandals")
-  public Message updateMandal(@RequestBody Iterable<Mandal> mandals) {
-    for (Mandal m : mandals) {
+  public Message updateMandal(@RequestBody Iterable<MandalDTO> mandals) {
+    for (MandalDTO m : mandals) {
       if(this.mandalRepository.existsById(m.getId())) {
         Mandal updatedMandal = this.mandalRepository.findById(m.getId()).get();
 
         updatedMandal.setName(m.getName());
         updatedMandal.setLocation(m.getLocation());
-        updatedMandal.setZone(m.getZone());
+
+        Zone zone = this.zoneRepository.findById(m.getZoneId()).orElseThrow(() -> new RuntimeException("Zone with id: " + m.getZoneId() + " was not found"));
+
+        updatedMandal.setZone(zone);
 
         this.mandalRepository.save(updatedMandal);
       }
