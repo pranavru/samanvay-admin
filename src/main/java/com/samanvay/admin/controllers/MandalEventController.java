@@ -36,7 +36,7 @@ public class MandalEventController {
 
   @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/events/{id}")
-  public MandalEvent getEventById(Long id) {
+  public MandalEvent getEventById(@PathVariable Long id) {
     return this.eventRepository
       .findById(id)
       .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
