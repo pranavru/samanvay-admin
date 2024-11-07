@@ -2,7 +2,6 @@ package com.samanvay.admin.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.samanvay.admin.repository.MandalRepository;
 import com.samanvay.admin.repository.ZoneRepository;
@@ -30,19 +29,16 @@ public class MandalController {
     this.mandalRepository = MandalRepository;
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/mandals")
   public Iterable<Mandal> getMandalsList() {
     return this.mandalRepository.findAll();
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/mandals/{id}")
   public Mandal getMandalById(@PathVariable Long id) {
     return this.mandalRepository.findById(id).orElse(null);
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/mandals")
   public Message createMandal(@RequestBody Iterable<MandalDTO> mandals) {
     for (MandalDTO m : mandals) {
@@ -59,7 +55,6 @@ public class MandalController {
     return new Message("Mandals created successfully", "success");
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @DeleteMapping("/api/mandals/{id}")
   public Message deleteMandal(@PathVariable Long id) {
     this.mandalRepository.deleteById(id);
@@ -67,7 +62,6 @@ public class MandalController {
     return new Message("Mandal deleted successfully", "success");
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PutMapping("/api/mandals")
   public Message updateMandal(@RequestBody Iterable<MandalDTO> mandals) {
     for (MandalDTO m : mandals) {

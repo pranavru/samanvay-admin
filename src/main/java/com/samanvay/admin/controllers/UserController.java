@@ -2,7 +2,6 @@ package com.samanvay.admin.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.samanvay.admin.entity.Address;
 import com.samanvay.admin.entity.Message;
@@ -45,13 +44,11 @@ public class UserController {
     this.userRepository = userRepository;
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/users")
   public Iterable<User> getUsersList() {
       return this.userRepository.findAll();
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/users/{id}")
   public User getUserById(@PathVariable Long id) {
     return this.userRepository
@@ -59,7 +56,6 @@ public class UserController {
       .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/users")
   public User saveUser(@RequestBody UserDTO userToSave) {
 
@@ -84,7 +80,6 @@ public class UserController {
       return this.userRepository.save(updatedUser);
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/bulk/users")
   public Long[] saveUsers(@RequestBody UserDTO[] usersToSave) {
     Long[] savedUserIds = new Long[usersToSave.length];
@@ -117,7 +112,6 @@ public class UserController {
     return savedUserIds;
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @DeleteMapping("/api/users/{id}")
   public Message deleteUser(@PathVariable Long id) {
     this.userRepository.deleteById(id);
@@ -125,7 +119,6 @@ public class UserController {
     return new Message("User with user ID: " + id + " deleted successfully", "success");
   }
   
-  @CrossOrigin(origins = "http://localhost:5173")
   @PutMapping("/api/users/{id}")
   public User updateUser(@PathVariable Long id, @RequestBody UserDTO userToSave) {    
     String UserNotFoundMessage = "User not found with id: " + id;
@@ -148,8 +141,6 @@ public class UserController {
       // Will be added later
 
     } else {
-      System.out.println("\n" + "User is not active" + "\n");
-
       existingUser.setName(userToSave.getName());
       existingUser.setEmail(userToSave.getEmail());
       existingUser.setPhoneNumber(userToSave.getPhoneNumber());

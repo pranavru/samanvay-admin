@@ -2,7 +2,6 @@ package com.samanvay.admin.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.samanvay.admin.repository.ZoneRepository;
 import com.samanvay.admin.entity.Message;
@@ -24,19 +23,16 @@ public class ZoneController {
     this.zoneRepository = zoneRepository;
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/zones")
   public Iterable<Zone> getZonesList() {
     return this.zoneRepository.findAll();
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/zones/{id}")
   public Zone getZoneById(@PathVariable Long id) {
     return this.zoneRepository.findById(id).orElse(null);
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/zones")
   public Message createZone(@RequestBody Iterable<Zone> zones) {
     for (Zone z : zones) {
@@ -51,7 +47,6 @@ public class ZoneController {
     return new Message("Zones created successfully", "success");
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @DeleteMapping("/api/zones/{id}")
   public Message deleteZone(@PathVariable Long id) {
     this.zoneRepository.deleteById(id);
@@ -59,7 +54,6 @@ public class ZoneController {
     return new Message("Zones deleted successfully", "success");
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PutMapping("/api/zones")
   public Message updateZone(@RequestBody Iterable<Zone> zones) {
     for (Zone z : zones) {
