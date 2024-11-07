@@ -3,12 +3,10 @@ package com.samanvay.admin.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.samanvay.admin.entity.MandalEvent;
 import com.samanvay.admin.entity.Message;
 import com.samanvay.admin.entity.DTO.MandalEventDTO;
@@ -28,13 +26,11 @@ public class MandalEventController {
     this.eventRepository = eventRepository;
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/events")
   public List<MandalEvent> getEventsList() {
     return this.eventRepository.findAll();
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @GetMapping("/api/events/{id}")
   public MandalEvent getEventById(@PathVariable Long id) {
     return this.eventRepository
@@ -42,7 +38,6 @@ public class MandalEventController {
       .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PostMapping("/api/event")
   public MandalEvent createEvent(@RequestBody MandalEventDTO event) {
     MandalEvent mandalEvent = MandalEvent.builder()
@@ -57,7 +52,6 @@ public class MandalEventController {
     return this.eventRepository.save(mandalEvent);
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @PutMapping("/api/event/{id}")
   public Message updateEvent(@PathVariable Long id, @RequestBody MandalEventDTO event) {
     MandalEvent mandalEvent = this.eventRepository
@@ -76,7 +70,6 @@ public class MandalEventController {
     return new Message("Event with name: " + event.getName() + " updated successfully", "success");
   }
 
-  @CrossOrigin(origins = "http://localhost:5173")
   @DeleteMapping("/api/event/{id}")
   public Message deleteEvent(@PathVariable Long id) {
     MandalEvent mandalEvent = this.eventRepository
