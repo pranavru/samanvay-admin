@@ -1,13 +1,14 @@
 package com.samanvay.admin.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.samanvay.admin.config.GlobalLiterals;
+import com.samanvay.admin.entity.User;
 import com.samanvay.admin.entity.UserAuth;
 import com.samanvay.admin.entity.DTO.AuthDTO;
+import com.samanvay.admin.entity.DTO.UserAuthDTO;
 import com.samanvay.admin.services.AuthenticationService;
+import com.samanvay.admin.services.UserService;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,14 +19,18 @@ public class UserAuthenticationController {
   @Autowired
   private AuthenticationService authService;
 
-  private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(GlobalLiterals.BCRYPT_ENCODER_STRENGTH);  
+  @Autowired
+  private UserService userService;
 
   @PostMapping("/register")
-  public UserAuth register(@RequestBody UserAuth user) {
+  public UserAuth register(@RequestBody UserAuthDTO user) {
+    User userExists = userService.findByEmail(user.getEmail());
+
     UserAuth updatedUser = UserAuth
       .builder()
       .username(user.getUsername())
-      .password(bCryptPasswordEncoder.encode(user.getPassword()))
+      .password(user.getPassword())
+      .user(userExists)
       .build();
 
     return authService.registerUser(updatedUser);
