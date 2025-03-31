@@ -9,7 +9,8 @@ const eventSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: [true, 'Event description is required']
+    default: '',
+    trim: true
   },
   date: {
     type: Date,
@@ -21,17 +22,32 @@ const eventSchema = new mongoose.Schema({
   },
   mandal: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Mandal',
-    required: true
-  },
-  capacity: {
-    type: Number,
-    default: null
+    ref: 'Mandal'
   },
   attendees: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    ride: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Ride',
+    }
   }],
+  attendance: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    attendance: {
+      type: Boolean,
+      default: false
+    }
+  }],
+  rides: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Ride'
+  },
   status: {
     type: String,
     enum: Object.values(EVENT_STATUS),

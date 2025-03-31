@@ -1,7 +1,10 @@
 // User Roles
 export const ROLES = {
   ADMIN: 'admin',
-  USER: 'user'
+  USER: 'user',
+  YUVAK: 'yuvak',
+  SAMPARK: 'sampark',
+  RIDE_MANAGER: 'ride_manager'
 };
 
 // API Routes

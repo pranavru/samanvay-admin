@@ -51,8 +51,14 @@ const userSchema = new mongoose.Schema({
     }
   },
   eventsAttending: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Event'
+    event: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event'
+    },
+    ride: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Ride'
+    }
   }],
   active: {
     type: Boolean,

@@ -9,6 +9,7 @@ import userRoutes from './routes/users.js';
 import eventRoutes from './routes/events.js';
 import mandalRoutes from './routes/mandals.js';
 import zoneRoutes from './routes/zones.js';
+import { API_ROUTES } from './constants/index.js';
 
 dotenv.config();
 
