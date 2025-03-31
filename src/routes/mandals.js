@@ -8,25 +8,28 @@ import {
   deleteMandal,
   addMember
 } from '../controllers/mandalController.js';
+import { API_ROUTES, ROLES } from '../constants/index.js';
 
 const router = express.Router();
 
 // Protect all routes
 router.use(protect);
 
+const mandalRestrictTo = restrictTo([ROLES.ADMIN]);
+
 router
-  .route('/')
+  .route(API_ROUTES.MANDALS.BASE)
   .get(getAllMandals)
-  .post(restrictTo('admin'), createMandal);
+  .post(mandalRestrictTo, createMandal);
 
 router
-  .route('/:id')
+  .route(API_ROUTES.MANDALS.BY_ID)
   .get(getMandal)
-  .patch(restrictTo('admin'), updateMandal)
-  .delete(restrictTo('admin'), deleteMandal);
+  .patch(mandalRestrictTo, updateMandal)
+  .delete(mandalRestrictTo, deleteMandal);
 
 router
-  .route('/:id/members')
-  .post(restrictTo('admin'), addMember);
+  .route(API_ROUTES.MANDALS.MEMBERS)
+  .post(mandalRestrictTo, addMember);
 
 export default router;

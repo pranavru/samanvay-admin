@@ -7,6 +7,7 @@ import {
   updateZone,
   deleteZone
 } from '../controllers/zoneController.js';
+import { API_ROUTES, ROLES } from '../constants/index.js';
 
 const router = express.Router();
 
@@ -16,13 +17,13 @@ router.use(protect);
 const restrictToAdmin = restrictTo('admin');
 
 router
-  .route('/')
+  .route(API_ROUTES.ZONES.BASE)
   .get(getAllZones)
   .patch(restrictToAdmin, updateZone)
   .post(restrictToAdmin, createZone);
 
 router
-  .route('/:id')
+  .route(API_ROUTES.ZONES.BY_ID)
   .get(getZone)
   .delete(restrictToAdmin, deleteZone);
 
