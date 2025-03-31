@@ -19,12 +19,17 @@ export const API_ROUTES = {
     BASE: '/users',
     ME: '/me',
     UPDATE_ME: '/updateMe',
-    BY_ID: '/:id'
+    BY_ID: '/:id',
+    REGISTER: '/register',
+    UPDATE_PASSWORD: '/updatePassword',
   },
   EVENTS: {
     BASE: '/events',
     BY_ID: '/:id',
-    REGISTER: '/:id/register'
+    REGISTER: '/:id/register',
+    UPDATE_RIDE_DETAILS: '/:id/updateRideDetails',
+    CONFIRM_ATTENDANCE: '/:id/confirmAttendance',
+    UPDATE_ATTENDANCE: '/:id/updateAttendance'
   },
   MANDALS: {
     BASE: '/mandals',

@@ -11,7 +11,7 @@ import {
   updateAttendance,
   updateRideDetails
 } from '../controllers/eventController.js';
-import { ROLES } from '../constants/index.js';
+import { API_ROUTES, ROLES } from '../constants/index.js';
 
 const router = express.Router();
 
@@ -28,20 +28,20 @@ router
   .post(eventRestrictTo, createEvent);
 
 router
-  .route('/:id')
+  .route(API_ROUTES.EVENTS.BY_ID)
   .get(getEvent)
   .patch(eventRestrictTo, updateEvent)
   .delete(eventRestrictTo, deleteEvent);
 
-router.post('/:id/register', registerForEvent);
+router.post(API_ROUTES.EVENTS.REGISTER, registerForEvent);
 
 router
-  .route('/:id/confirmAttendance')
+  .route(API_ROUTES.EVENTS.CONFIRM_ATTENDANCE)
   .post(attendanceRestrictedTo, confirmAttendance)
   .patch(attendanceRestrictedTo, updateAttendance);
 
 router
-  .route('/:id/updateRideDetails')
+  .route(API_ROUTES.EVENTS.UPDATE_RIDE_DETAILS)
   .patch(rideRestrictTo, updateRideDetails);
 
 export default router;

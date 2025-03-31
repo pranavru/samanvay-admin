@@ -10,7 +10,7 @@ import {
   updatePassword,
   registerUser
 } from '../controllers/userController.js';
-import { ROLES } from '../constants/index.js';
+import { API_ROUTES, ROLES } from '../constants/index.js';
 
 const router = express.Router();
 
@@ -26,11 +26,11 @@ router.patch('/updatePassword', updatePassword);
 router.use(restrictTo([ROLES.ADMIN, ROLES.SAMPARK]));
 
 router
-  .route('/')
+  .route(API_ROUTES.USERS.BASE)
   .get(getAllUsers);
 
 router
-  .route('/:id')
+  .route(API_ROUTES.USERS.BY_ID)
   .get(getUser)
   .patch(updateUser)
   .delete(deleteUser);
