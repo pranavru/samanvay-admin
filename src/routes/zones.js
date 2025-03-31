@@ -13,15 +13,17 @@ const router = express.Router();
 // Protect all routes
 router.use(protect);
 
+const restrictToAdmin = restrictTo('admin');
+
 router
   .route('/')
   .get(getAllZones)
-  .post(restrictTo('admin'), createZone);
+  .patch(restrictToAdmin, updateZone)
+  .post(restrictToAdmin, createZone);
 
 router
   .route('/:id')
   .get(getZone)
-  .patch(restrictTo('admin'), updateZone)
-  .delete(restrictTo('admin'), deleteZone);
+  .delete(restrictToAdmin, deleteZone);
 
 export default router;

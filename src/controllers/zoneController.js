@@ -2,10 +2,39 @@ import Zone from '../models/zone.js';
 
 export const createZone = async (req, res) => {
   try {
-    const zone = await Zone.create(req.body);
+    const zonesData = Array.isArray(req.body) ? req.body : [req.body];
+
+    zonesData.map(zoneData => { zoneData.coordinator = req.user._id});
+
+    // Validate all zones before creating any
+    const validationPromises = zonesData.map(async (zoneData) => {
+      const zone = new Zone(zoneData);
+      return zone.validate();
+    });
+
+    try {
+      await Promise.all(validationPromises);
+    } catch (validationError) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Validation failed',
+        error: validationError.message
+      });
+    }
+
+    // Create all zones
+    const createdZones = await Zone.create(zonesData);
+
+    // Populate coordinator details for response
+    const populatedZones = await Zone.populate(createdZones, {
+      path: 'coordinator',
+      select: 'name email'
+    });
+
     res.status(201).json({
       status: 'success',
-      data: zone
+      results: populatedZones.length,
+      data: populatedZones
     });
   } catch (error) {
     res.status(400).json({
@@ -66,25 +95,46 @@ export const getZone = async (req, res) => {
 
 export const updateZone = async (req, res) => {
   try {
-    const zone = await Zone.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    const updates = Array.isArray(req.body) ? req.body : [{ id: req.params.id, ...req.body }];
 
-    if (!zone) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Zone not found'
-      });
+    // Validate all updates
+    for (const update of updates) {
+      if (!update.id) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Zone ID is required for each update'
+        });
+      }
     }
+
+    // Update all zones
+    const updatePromises = updates.map(async (update) => {
+      const { id, ...updateData } = update;
+
+      console.log('Updating zone with ID:', id, 'with data:', updateData);
+    
+      const updatedZone = await Zone.findByIdAndUpdate(
+        id,
+        updateData,
+        {
+          new: true,
+          runValidators: true
+        }
+      ).populate('coordinator', 'name email');
+
+      if (!updatedZone) {
+        throw new Error(`Zone not found with ID: ${id}`);
+      }
+
+      return updatedZone;
+    });
+
+    const updatedZones = await Promise.all(updatePromises);
 
     res.status(200).json({
       status: 'success',
-      data: zone
+      results: updatedZones.length,
+      data: updatedZones
     });
   } catch (error) {
     res.status(400).json({
